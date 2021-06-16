@@ -148,7 +148,7 @@ struct FAnimSegment
 
 	/** Converts 'Track Position' to position on AnimSequence.
 	 * Note: doesn't check that position is in valid range, must do that before calling this function! */
-	float ConvertTrackPosToAnimPos(const float& TrackPosition) const;
+	ENGINE_API float ConvertTrackPosToAnimPos(const float& TrackPosition) const;
 
 	/** 
 	 * Retrieves AnimNotifies between two Track time positions. ]PreviousTrackPosition, CurrentTrackPosition]
