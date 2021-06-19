@@ -1372,6 +1372,24 @@ void FHLSLMaterialTranslator::GetMaterialEnvironment(EShaderPlatform InPlatform,
 			}
 		}
 
+		if (ShadingModels.HasShadingModel(MSM_WaterColorSoftObject))
+		{
+			OutEnvironment.SetDefine(TEXT("MATERIAL_SHADINGMODEL_WaterColorSoftObject"), TEXT("1"));
+			NumSetMaterials++;
+		}
+
+		if (ShadingModels.HasShadingModel(MSM_WaterColorHardSurface))
+		{
+			OutEnvironment.SetDefine(TEXT("MATERIAL_SHADINGMODEL_WaterColorHardSurface"), TEXT("1"));
+			NumSetMaterials++;
+		}
+
+		if (ShadingModels.HasShadingModel(MSM_WaterColorCloth))
+		{
+			OutEnvironment.SetDefine(TEXT("MATERIAL_SHADINGMODEL_WaterColorCloth"), TEXT("1"));
+			NumSetMaterials++;
+		}
+
 		if (ShadingModels.HasShadingModel(MSM_SingleLayerWater) &&
 			(IsVulkanMobileSM5Platform(Platform) || FDataDrivenShaderPlatformInfo::GetRequiresDisableForwardLocalLights(Platform)))
 		{

@@ -787,6 +787,12 @@ FDirectLighting IntegrateBxDF( FGBufferData GBuffer, half3 N, half3 V, half3 L, 
 			return ClothBxDF( GBuffer, N, V, L, Falloff, NoL, AreaLight, Shadow );
 		case SHADINGMODELID_EYE:
 			return EyeBxDF( GBuffer, N, V, L, Falloff, NoL, AreaLight, Shadow );
+		case SHADINGMODELID_WaterColorSoftObject:
+			return DefaultLitBxDF(GBuffer, N, V, L, Falloff, NoL, AreaLight, Shadow);
+		case SHADINGMODELID_WaterColorHardSurface:
+			return DefaultLitBxDF(GBuffer, N, V, L, Falloff, NoL, AreaLight, Shadow);
+		case SHADINGMODELID_WaterColorCloth:
+			return DefaultLitBxDF(GBuffer, N, V, L, Falloff, NoL, AreaLight, Shadow);
 		default:
 			return (FDirectLighting)0;
 	}

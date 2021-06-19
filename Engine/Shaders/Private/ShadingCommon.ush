@@ -15,7 +15,10 @@
 #define SHADINGMODELID_EYE					9
 #define SHADINGMODELID_SINGLELAYERWATER		10
 #define SHADINGMODELID_THIN_TRANSLUCENT		11
-#define SHADINGMODELID_NUM					12
+#define SHADINGMODELID_WaterColorSoftObject	12
+#define SHADINGMODELID_WaterColorHardSurface 13
+#define SHADINGMODELID_WaterColorCloth		14
+#define SHADINGMODELID_NUM					15
 #define SHADINGMODELID_MASK					0xF		// 4 bits reserved for ShadingModelID			
 
 // The flags are defined so that 0 value has no effect!
@@ -68,6 +71,12 @@ float3 GetShadingModelColor(uint ShadingModelID)
 		case SHADINGMODELID_EYE: return float3(0.3f, 1.0f, 1.0f);
 		case SHADINGMODELID_SINGLELAYERWATER: return float3(0.5f, 0.5f, 1.0f);
 		case SHADINGMODELID_THIN_TRANSLUCENT: return float3(1.0f, 0.8f, 0.3f);
+		case SHADINGMODELID_WaterColorSoftObject:
+			return float3(0.7f, 0.2f, 0.2f); // Pink
+		case SHADINGMODELID_WaterColorHardSurface:
+			return float3(0.7f, 0.6f, 0.2f); // Brown
+		case SHADINGMODELID_WaterColorCloth:
+			return float3(0.7f, 0.9f, 0.2f); // Cyan
 		default: return float3(1.0f, 1.0f, 1.0f); // White
 	}
 #endif
