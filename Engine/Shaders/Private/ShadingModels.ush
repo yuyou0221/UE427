@@ -242,6 +242,41 @@ FDirectLighting DefaultLitBxDF( FGBufferData GBuffer, half3 N, half3 V, half3 L,
 	return Lighting;
 }
 
+
+
+FDirectLighting WaterColorSoftObjectBxDF(FGBufferData GBuffer, half3 N, half3 V, half3 L, float Falloff, float NoL, FAreaLight AreaLight, FShadowTerms Shadow)
+{
+	BxDFContext Context;
+
+	bool bHasAnisotropy = HasAnisotropy(GBuffer.SelectiveOutputMask);
+	BRANCH
+
+	if (bHasAnisotropy)
+	{
+		half3 X = GBuffer.WorldTangent;
+		half3 Y = normalize(cross(N, X));
+		Init(Context, N, X, Y, V, L);
+	}
+	else
+	{
+		Init(Context, N, V, L);
+		SphereMaxNoH(Context, AreaLight.SphereSinAlpha, true);
+	}
+
+	Context.NoV = saturate(abs(Context.NoV) + 1e-5);
+
+	float d = 2 - saturate(NoL);
+	float3 color = Diffuse_Lambert(GBuffer.DiffuseColor);
+	float3 c = color - (color - color * color) * (d - 1);
+	FDirectLighting Lighting;
+	//Lighting.Diffuse = AreaLight.FalloffColor * (Falloff * NoL) * Diffuse_Lambert(GBuffer.DiffuseColor);
+	//Lighting.Diffuse = AreaLight.FalloffColor * c * (Falloff * NoL);
+	Lighting.Diffuse = AreaLight.FalloffColor * c * Falloff * NoL;
+	Lighting.Specular = 0;
+	Lighting.Transmission = 0;
+	return Lighting;
+}
+
 float3 SimpleShading( float3 DiffuseColor, float3 SpecularColor, float Roughness, float3 L, float3 V, half3 N )
 {
 	float3 H = normalize(V + L);
@@ -788,7 +823,7 @@ FDirectLighting IntegrateBxDF( FGBufferData GBuffer, half3 N, half3 V, half3 L, 
 		case SHADINGMODELID_EYE:
 			return EyeBxDF( GBuffer, N, V, L, Falloff, NoL, AreaLight, Shadow );
 		case SHADINGMODELID_WaterColorSoftObject:
-			return DefaultLitBxDF(GBuffer, N, V, L, Falloff, NoL, AreaLight, Shadow);
+			return WaterColorSoftObjectBxDF(GBuffer, N, V, L, Falloff, NoL, AreaLight, Shadow);
 		case SHADINGMODELID_WaterColorHardSurface:
 			return DefaultLitBxDF(GBuffer, N, V, L, Falloff, NoL, AreaLight, Shadow);
 		case SHADINGMODELID_WaterColorCloth:
