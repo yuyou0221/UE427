@@ -91,7 +91,7 @@ void ExecuteShadingLoops(inout float4 CompositedLighting, FScreenSpaceData Scree
 		FRectTexture RectTexture = InitRectTexture(DeferredLightUniforms.SourceTexture);
 		float SurfaceShadow = 1.0f;
 		CompositedLighting += GetDynamicLighting(WorldPosition, CameraVector, ScreenSpaceData.GBuffer, ScreenSpaceData.AmbientOcclusion, ScreenSpaceData.GBuffer.ShadingModelID, LightData, float4(1, 1, 1, 1), 0.5, uint2(0,0), RectTexture, SurfaceShadow);
-	}
+		}
 
 	// The simple shading model does not depend on ShadingModelID, so use it anytime the material is lit
 	LOOP

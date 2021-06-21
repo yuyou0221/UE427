@@ -887,8 +887,8 @@ void FPixelShaderInOut_MainPS(
 
 	// If we don't use this shading model the color should be black (don't generate shader code for unused data, don't do indirectlighting cache lighting with this color).
 	float3 SubsurfaceColor = 0;
-#if MATERIAL_SHADINGMODEL_SUBSURFACE || MATERIAL_SHADINGMODEL_PREINTEGRATED_SKIN || MATERIAL_SHADINGMODEL_SUBSURFACE_PROFILE || MATERIAL_SHADINGMODEL_TWOSIDED_FOLIAGE || MATERIAL_SHADINGMODEL_CLOTH || MATERIAL_SHADINGMODEL_EYE
-	if (ShadingModel == SHADINGMODELID_SUBSURFACE || ShadingModel == SHADINGMODELID_PREINTEGRATED_SKIN || ShadingModel == SHADINGMODELID_SUBSURFACE_PROFILE || ShadingModel == SHADINGMODELID_TWOSIDED_FOLIAGE || ShadingModel == SHADINGMODELID_CLOTH || ShadingModel == SHADINGMODELID_EYE)
+#if MATERIAL_SHADINGMODEL_SUBSURFACE || MATERIAL_SHADINGMODEL_PREINTEGRATED_SKIN || MATERIAL_SHADINGMODEL_SUBSURFACE_PROFILE || MATERIAL_SHADINGMODEL_TWOSIDED_FOLIAGE || MATERIAL_SHADINGMODEL_CLOTH || MATERIAL_SHADINGMODEL_EYE || MATERIAL_SHADINGMODEL_WaterColorSoftObject|| MATERIAL_SHADINGMODEL_WaterColorHardSurface|| MATERIAL_SHADINGMODEL_WaterColorCloth
+	if (ShadingModel == SHADINGMODELID_SUBSURFACE || ShadingModel == SHADINGMODELID_PREINTEGRATED_SKIN || ShadingModel == SHADINGMODELID_SUBSURFACE_PROFILE || ShadingModel == SHADINGMODELID_TWOSIDED_FOLIAGE || ShadingModel == SHADINGMODELID_CLOTH || ShadingModel ==SHADINGMODELID_EYE ||ShadingModel ==SHADINGMODELID_WaterColorSoftObject||ShadingModel ==SHADINGMODELID_WaterColorHardSurface||ShadingModel ==SHADINGMODELID_WaterColorCloth )
 	{
 		float4 SubsurfaceData = GetMaterialSubsurfaceData(PixelMaterialInputs);
 
@@ -901,8 +901,8 @@ void FPixelShaderInOut_MainPS(
 			SubsurfaceColor = SubsurfaceData.rgb * View.DiffuseOverrideParameter.w + View.DiffuseOverrideParameter.xyz;
 		}
 #endif
-#if MATERIAL_SHADINGMODEL_CLOTH
-		else if (ShadingModel == SHADINGMODELID_CLOTH)
+#if MATERIAL_SHADINGMODEL_CLOTH|| MATERIAL_SHADINGMODEL_WaterColorSoftObject|| MATERIAL_SHADINGMODEL_WaterColorHardSurface|| MATERIAL_SHADINGMODEL_WaterColorCloth
+		else if (ShadingModel == SHADINGMODELID_CLOTH||ShadingModel ==SHADINGMODELID_WaterColorSoftObject||ShadingModel ==SHADINGMODELID_WaterColorHardSurface||ShadingModel ==SHADINGMODELID_WaterColorCloth)
 		{
 			SubsurfaceColor = SubsurfaceData.rgb;
 		}
@@ -1010,6 +1010,9 @@ void FPixelShaderInOut_MainPS(
 	
 	// So that the following code can still use DiffuseColor and SpecularColor.
 	GBuffer.SpecularColor = ComputeF0(Specular, BaseColor, Metallic);
+#if MATERIAL_SHADINGMODEL_WaterColorSoftObject||MATERIAL_SHADINGMODEL_WaterColorHardSurface||MATERIAL_SHADINGMODEL_WaterColorCloth
+	GBuffer.SpecularColor = 2 * BaseColor - BaseColor * BaseColor;
+#endif
 
 #if MATERIAL_NORMAL_CURVATURE_TO_ROUGHNESS
 	// Curvature-to-roughness uses derivatives of the WorldVertexNormal, which is incompatible with centroid interpolation because
@@ -1039,6 +1042,9 @@ void FPixelShaderInOut_MainPS(
 	}
 #endif
 	GBuffer.DiffuseColor = BaseColor - BaseColor * Metallic;
+#if MATERIAL_SHADINGMODEL_WaterColorSoftObject||MATERIAL_SHADINGMODEL_WaterColorHardSurface||MATERIAL_SHADINGMODEL_WaterColorCloth
+	GBuffer.DiffuseColor = BaseColor;
+#endif
 
 #if USE_DEVELOPMENT_SHADERS
 	{
@@ -1082,6 +1088,7 @@ void FPixelShaderInOut_MainPS(
 
 		float3 DiffuseDir = BentNormal;
 		float3 DiffuseColorForIndirect = GBuffer.DiffuseColor;
+
 
 		#if MATERIAL_SHADINGMODEL_SUBSURFACE || MATERIAL_SHADINGMODEL_PREINTEGRATED_SKIN
 		if (GBuffer.ShadingModelID == SHADINGMODELID_SUBSURFACE || GBuffer.ShadingModelID == SHADINGMODELID_PREINTEGRATED_SKIN)
@@ -1134,9 +1141,12 @@ void FPixelShaderInOut_MainPS(
 			SubsurfaceIndirectLighting *= IndirectOcclusion;
 			IndirectIrradiance *= IndirectOcclusion;
 		#endif
-
+	
 		DiffuseColor += (DiffuseIndirectLighting * DiffuseColorForIndirect + SubsurfaceIndirectLighting * SubsurfaceColor) * AOMultiBounce( GBuffer.BaseColor, DiffOcclusion );
-
+#if MATERIAL_SHADINGMODEL_WaterColorSoftObject||MATERIAL_SHADINGMODEL_WaterColorHardSurface||MATERIAL_SHADINGMODEL_WaterColorCloth
+	//DiffuseColor = BaseColor - (BaseColor - BaseColor * BaseColor) * ((3-AOMultiBounce( GBuffer.BaseColor, DiffOcclusion ))-1);
+	DiffuseColor = BaseColor * BaseColor;
+#endif
 #if MATERIAL_SHADINGMODEL_SINGLELAYERWATER
 		// Fade out diffuse as this will be handled by the single scattering lighting in water material.
 		// We do this after the just above GetPrecomputedIndirectLightingAndSkyLight to keep ambiant lighting avialable.
@@ -1304,6 +1314,7 @@ void FPixelShaderInOut_MainPS(
 	// Otherwise just add them together.
 	Color += DiffuseColor;
 #endif
+	
 
 #if !MATERIAL_SHADINGMODEL_THIN_TRANSLUCENT
 	Color += Emissive;

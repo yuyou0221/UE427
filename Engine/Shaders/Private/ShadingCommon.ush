@@ -15,7 +15,10 @@
 #define SHADINGMODELID_EYE					9
 #define SHADINGMODELID_SINGLELAYERWATER		10
 #define SHADINGMODELID_THIN_TRANSLUCENT		11
-#define SHADINGMODELID_NUM					12
+#define SHADINGMODELID_WaterColorSoftObject	12
+#define SHADINGMODELID_WaterColorHardSurface 13
+#define SHADINGMODELID_WaterColorCloth		14
+#define SHADINGMODELID_NUM					15
 #define SHADINGMODELID_MASK					0xF		// 4 bits reserved for ShadingModelID			
 
 // The flags are defined so that 0 value has no effect!
@@ -56,18 +59,24 @@ float3 GetShadingModelColor(uint ShadingModelID)
 #else
 	switch(ShadingModelID)
 	{
-		case SHADINGMODELID_UNLIT: return float3(0.1f, 0.1f, 0.2f); // Dark Blue
+		case SHADINGMODELID_UNLIT: return float3(1.0f, 0.1f, 0.2f); // Dark Blue
 		case SHADINGMODELID_DEFAULT_LIT: return float3(0.1f, 1.0f, 0.1f); // Green
-		case SHADINGMODELID_SUBSURFACE: return float3(1.0f, 0.1f, 0.1f); // Red
+		case SHADINGMODELID_SUBSURFACE: return float3(0.0f, 0.1f, 0.1f); // Red
 		case SHADINGMODELID_PREINTEGRATED_SKIN: return float3(0.6f, 0.4f, 0.1f); // Brown
 		case SHADINGMODELID_CLEAR_COAT: return float3(0.1f, 0.4f, 0.4f); // Brown
 		case SHADINGMODELID_SUBSURFACE_PROFILE: return float3(0.2f, 0.6f, 0.5f); // Cyan
 		case SHADINGMODELID_TWOSIDED_FOLIAGE: return float3(0.2f, 0.2f, 0.8f); // Cyan
-		case SHADINGMODELID_HAIR: return float3(0.6f, 0.1f, 0.5f);
-		case SHADINGMODELID_CLOTH: return float3(0.7f, 1.0f, 1.0f);
-		case SHADINGMODELID_EYE: return float3(0.3f, 1.0f, 1.0f);
-		case SHADINGMODELID_SINGLELAYERWATER: return float3(0.5f, 0.5f, 1.0f);
-		case SHADINGMODELID_THIN_TRANSLUCENT: return float3(1.0f, 0.8f, 0.3f);
+		case SHADINGMODELID_HAIR: return float3(0.0f, 0.1f, 0.5f);
+		case SHADINGMODELID_CLOTH: return float3(0.0f, 1.0f, 1.0f);
+		case SHADINGMODELID_EYE: return float3(0.0f, 1.0f, 1.0f);
+		case SHADINGMODELID_SINGLELAYERWATER: return float3(0.0f, 0.5f, 1.0f);
+		case SHADINGMODELID_THIN_TRANSLUCENT: return float3(0.0f, 0.8f, 0.3f);
+		case SHADINGMODELID_WaterColorSoftObject:
+			return float3(0.0f, 0.2f, 0.2f); // Pink
+		case SHADINGMODELID_WaterColorHardSurface:
+			return float3(0.0f, 0.6f, 0.2f); // Brown
+		case SHADINGMODELID_WaterColorCloth:
+			return float3(0.0f, 0.9f, 0.2f); // Cyan
 		default: return float3(1.0f, 1.0f, 1.0f); // White
 	}
 #endif
